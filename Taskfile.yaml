@@ -1,0 +1,30 @@
+version: '3'
+
+vars:
+  REPOSITORY_NAME: "your-repo"
+  COMMIT_HASH: "latest"
+
+tasks:
+  default:
+    desc: Default task
+    cmds:
+      - task: build
+
+  build:
+    desc: Build the Docker image with the repository name and current Git commit hash or 'latest' as the tag
+    cmds:
+      - docker build -t {{.REPOSITORY_NAME}}/kube-api-profiling:{{.COMMIT_HASH}} .
+    silent: true
+
+  run:
+    desc: Run the Docker container with the repository name and current Git commit hash or 'latest' as the tag
+    cmds:
+      - docker run -d -p 6061:6061 -p 6062:6062 -v ${HOME}/.kube:/root/.kube --name kube-api-profiling {{.REPOSITORY_NAME}}/kube-api-profiling:{{.COMMIT_HASH}}
+    silent: true
+
+  clean:
+    desc: Remove Docker image and container with the repository name and current Git commit hash or 'latest' as the tag
+    cmds:
+      - docker rm -f kube-api-profiling || true
+      - docker rmi {{.REPOSITORY_NAME}}/kube-api-profiling:{{.COMMIT_HASH}} || true
+    silent: true
